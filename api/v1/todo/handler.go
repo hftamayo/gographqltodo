@@ -1,6 +1,9 @@
 package todo
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hftamayo/gographqltodo/api/v1/models"
 	"github.com/jinzhu/gorm"
@@ -18,23 +21,25 @@ func NewTodoRepositoryImpl(db *gorm.DB) *TodoRepositoryImpl {
 	return &TodoRepositoryImpl{db: db}
 }
 
-func (h *Handler) CreateTodo(c *fiber.Ctx) error {
+func (h *Handler) CreateTodo(c *gin.Context) {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
 	todo := &models.Todo{}
 
-	if err := c.BodyParser(todo); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
+	if err := c.ShouldBindJSON(todo); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot parse JSON"})
+		return
 	}
 	err := service.CreateTodo(todo)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error: failed to create a new task": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create a new task", "details": err.Error()})
+		return
 	}
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "task created successfully", "data": todo})
+	c.JSON(http.StatusCreated, gin.H{"message": "task created successfully", "data": todo})
 }
 
-func (h *Handler) UpdateTodo(c *fiber.Ctx) error {
+func (h *Handler) UpdateTodo(c *gin.Context) {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
@@ -62,7 +67,7 @@ func (h *Handler) UpdateTodo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task updated successfully", "data": todo})
 }
 
-func (h *Handler) UpdateTodoDone(c *fiber.Ctx) error {
+func (h *Handler) UpdateTodoDone(c *gin.Context) error {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
@@ -94,7 +99,7 @@ func (h *Handler) UpdateTodoDone(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task updated successfully", "data": todo})
 }
 
-func (h *Handler) GetAllTodos(c *fiber.Ctx) error {
+func (h *Handler) GetAllTodos(c *gin.Context) error {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
@@ -105,7 +110,7 @@ func (h *Handler) GetAllTodos(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Tasks fetched successfully", "data": todos})
 }
 
-func (h *Handler) GetTodoById(c *fiber.Ctx) error {
+func (h *Handler) GetTodoById(c *gin.Context) error {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
@@ -123,7 +128,7 @@ func (h *Handler) GetTodoById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task fetched successfully", "data": todo})
 }
 
-func (h *Handler) DeleteTodoById(c *fiber.Ctx) error {
+func (h *Handler) DeleteTodoById(c *gin.Context) error {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
