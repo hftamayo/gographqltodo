@@ -84,7 +84,7 @@ func (h *Handler) UpdateTodoDone(c *gin.Context) {
 	}
 
 	var body map[string]bool
-	if err := c.BodyParser(&body); err != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot parse JSON"})
 		return
 	}
