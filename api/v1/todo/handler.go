@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofiber/fiber/v2"
 	"github.com/hftamayo/gographqltodo/api/v1/models"
 	"github.com/jinzhu/gorm"
 )
@@ -138,20 +137,22 @@ func (h *Handler) GetTodoById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task fetched successfully", "data": todo})
 }
 
-func (h *Handler) DeleteTodoById(c *gin.Context) error {
+func (h *Handler) DeleteTodoById(c *gin.Context) {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
 
 	// Parse the ID from the URL parameter.
-	id, err := c.ParamsInt("id")
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	err = service.DeleteTodoById(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete task", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete task", "details": err.Error()})
+		return
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Task deleted successfully"})
 }
