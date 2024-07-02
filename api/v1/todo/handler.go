@@ -106,15 +106,16 @@ func (h *Handler) UpdateTodoDone(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task updated successfully", "data": todo})
 }
 
-func (h *Handler) GetAllTodos(c *gin.Context) error {
+func (h *Handler) GetAllTodos(c *gin.Context) {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
 	todos, err := service.GetAllTodos()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch tasks", "details": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to fetch tasks", " details": err.Error()})
+		return
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Tasks fetched successfully", "data": todos})
+	c.JSON(http.StatusOK, gin.H{"message": "Tasks fetched successfully", "data": todos})
 }
 
 func (h *Handler) GetTodoById(c *gin.Context) error {
