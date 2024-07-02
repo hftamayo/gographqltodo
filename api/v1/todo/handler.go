@@ -118,22 +118,24 @@ func (h *Handler) GetAllTodos(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Tasks fetched successfully", "data": todos})
 }
 
-func (h *Handler) GetTodoById(c *gin.Context) error {
+func (h *Handler) GetTodoById(c *gin.Context) {
 	db := h.db
 	repo := NewTodoRepositoryImpl(db)
 	service := NewTodoService(repo)
 
 	// Parse the ID from the URL parameter.
-	id, err := c.ParamsInt("id")
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	todo, err := service.GetTodoById(id)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch task", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task", "details": err.Error()})
+		return
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task fetched successfully", "data": todo})
+	c.JSON(http.StatusOK, gin.H{"message": "Task fetched successfully", "data": todo})
 }
 
 func (h *Handler) DeleteTodoById(c *gin.Context) error {
