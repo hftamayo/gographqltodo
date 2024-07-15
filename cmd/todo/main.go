@@ -10,7 +10,7 @@ import (
 	"github.com/hftamayo/gographqltodo/api/routes"
 	"github.com/hftamayo/gographqltodo/api/v1/todo"
 	"github.com/hftamayo/gographqltodo/pkg/config"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 var db *gorm.DB
