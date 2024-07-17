@@ -44,7 +44,7 @@ func (s *TodoService) MarkTodoAsDone(id int, done bool) (*models.Todo, error) {
 	}
 
 	// Mark the todo as done.
-	existingTodo.Done = done
+	existingTodo.Done = &done
 
 	// Save the updated todo in the database.
 	err = s.repo.Update(existingTodo)
