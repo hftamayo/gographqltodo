@@ -8,9 +8,14 @@ import (
 	"context"
 
 	"github.com/hftamayo/gographqltodo/api/v1/models"
+	"gorm.io/gorm"
 )
 
-type Resolver struct{}
+type Resolver struct {
+	DB *gorm.DB
+}
+
+type mutationResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, title string, body string) (*models.Todo, error) {
 	newTodo := models.Todo{
